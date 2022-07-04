@@ -1,0 +1,58 @@
+package com.cy.store.controller;
+
+import com.cy.store.entity.Address;
+import com.cy.store.service.impl.AddressServiceImpl;
+import com.cy.store.util.JsonResult;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpSession;
+import java.util.List;
+
+
+@RestController
+@RequestMapping("addresses")
+public class AddressController extends BaseController {
+    @Autowired
+    private AddressServiceImpl addressService;
+
+    @RequestMapping("addNewAddress")
+    public JsonResult<Void> addNewAddress(Address address, HttpSession session) {
+        // 从Session中获取uid和username
+        Integer uid = getuidFromSession(session);
+        String username = getusernameFromSession(session);
+
+        // 调用业务对象的方法执行业务
+        addressService.addNewAddress(uid, username, address);
+        // 响应成功
+        return new JsonResult<Void>(OK);
+    }
+//    @RequestMapping("{aid}/setDefault")
+//    public JsonResult<Void> setDefault(@Param("aid") Integer aid,HttpSession session){
+//        addressService.
+//    }
+    @RequestMapping({"","/"})
+    public JsonResult<List<Address>> getByUid(HttpSession session){
+        Integer uid=getuidFromSession(session);
+        List<Address> data=addressService.getByUid(uid);
+        return new JsonResult<List<Address>>(OK,data);
+    }
+    @RequestMapping("{aid}/set_default")
+    public JsonResult<Void> setDefault(@PathVariable("aid") Integer aid, HttpSession session) {
+        Integer uid = getuidFromSession(session);
+        String username = getusernameFromSession(session);
+        addressService.setDefault(aid, uid, username);
+        return new JsonResult<Void>(OK);
+    }
+
+    @RequestMapping("{aid}/delete")
+    public JsonResult<Void> delete(@PathVariable("aid") Integer aid, HttpSession session) {
+        Integer uid = getuidFromSession(session);
+        String username = getusernameFromSession(session);
+        addressService.delete(aid, uid, username);
+        return new JsonResult<Void>(OK);
+    }
+}
